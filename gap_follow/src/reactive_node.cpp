@@ -32,7 +32,7 @@ class ReactiveFollowGap : public rclcpp::Node {
         // 1.Setting each value to the mean over some window
         // 2.Rejecting high values (eg. > 3m)
         this->processed_lidar.clear();
-        for (int i = 0; i < scan_msg->ranges.size(); i++) {
+        for (int i = 0; i < (int)scan_msg->ranges.size(); i++) {
             if (scan_msg->ranges[i] > 3.0) {
                 this->processed_lidar.push_back(0);
             } else {
