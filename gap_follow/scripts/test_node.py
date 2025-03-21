@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from ackermann_msgs.msg import AckermannDriveStamped
@@ -15,7 +16,7 @@ class GapFollower(Node):
     STRAIGHTS_STEERING_ANGLE = np.pi / 18  # Steering angle threshold for straights
 
     def __init__(self):
-        super().__init__('gap_follower_node')
+        super().__init__('test_node')
 
         # Initialize subscribers and publishers
         self.subscription_lidar = self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
