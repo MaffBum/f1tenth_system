@@ -41,7 +41,7 @@ amcl:
 
 amcl_map_client:
   ros__parameters:
-    use_sim_time: False # True 
+    use_sim_time: True
 
 amcl_rclcpp_node:
   ros__parameters:
@@ -152,8 +152,7 @@ controller_server:
 
 controller_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
-
+    use_sim_time: True
 
 local_costmap:
   local_costmap:
