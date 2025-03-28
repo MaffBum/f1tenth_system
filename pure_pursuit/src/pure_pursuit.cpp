@@ -25,7 +25,7 @@
 
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
     // initialise parameters
-    this->declare_parameter("waypoints_path", "/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/test.csv");
+    this->declare_parameter("waypoints_path", "/sim_ws/src/pure_pursuit/racelines/e7_floor5.csv");
     this->declare_parameter("odom_topic", "/ego_racecar/odom");
     this->declare_parameter("car_refFrame", "ego_racecar/base_link");
     this->declare_parameter("drive_topic", "/drive");
@@ -55,7 +55,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
     velocity_percentage = this->get_parameter("velocity_percentage").as_double();
 
     subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
-    timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
+    timer_ = this->create_wall_timer(20ms, std::bind(&PurePursuit::timer_callback, this));
 
     publisher_drive = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>(drive_topic, 25);
     vis_current_point_pub = this->create_publisher<visualization_msgs::msg::Marker>(rviz_current_waypoint_topic, 10);
@@ -333,6 +333,7 @@ void PurePursuit::timer_callback() {
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto node_ptr = std::make_shared<PurePursuit>();  // initialise node pointer
+    rclcpp::Rate loop_rate(100);
     rclcpp::spin(node_ptr);
     rclcpp::shutdown();
     return 0;
