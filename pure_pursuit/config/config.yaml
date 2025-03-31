@@ -1,7 +1,7 @@
 pure_pursuit:
   ros__parameters:
-    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/glazed_doughnut.csv"
-    odom_topic: "/pf/pose/odom"
+    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/31march.csv"
+    odom_topic: "/odom"
     car_refFrame: "laser"
     global_refFrame: "map"
     drive_topic: "/drive"
@@ -21,4 +21,4 @@ pure_pursuit:
 
 waypoint_visualizer_node:
   ros__parameters:
-    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/glazed_doughnut.csv"
+    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/31march.csv"
