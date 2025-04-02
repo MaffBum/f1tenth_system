@@ -12,8 +12,8 @@ class GapFollower(Node):
     PREPROCESS_CONV_SIZE = 3 # Size for convolution filter during preprocessing
     BEST_POINT_CONV_SIZE = 80  # Size for averaging in the best point detection
     MAX_LIDAR_DIST = 3.0  # Maximum distance to consider from the LiDAR
-    STRAIGHTS_SPEED = 1.8 # Speed while driving straight
-    CORNERS_SPEED = 1.6  # Speed while turning
+    STRAIGHTS_SPEED = 1.0# Speed while driving straight
+    CORNERS_SPEED = 0.8  # Speed while turning
     STRAIGHTS_STEERING_ANGLE = np.pi / 18  # Steering angle threshold for straights
 
     def __init__(self):
@@ -31,7 +31,7 @@ class GapFollower(Node):
         )
 
         # Set a publishing rate (50Hz)
-        self.timer = self.create_timer(0.02, self.publish_drive)
+        self.timer = self.create_timer(0.2, self.publish_drive)
 
         # Previous values for smoothing
         self.prev_steering_angle = 0.0

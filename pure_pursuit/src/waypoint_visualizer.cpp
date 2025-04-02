@@ -18,14 +18,14 @@
 #include "visualization_msgs/msg/marker_array.hpp"
 
 WaypointVisualizer::WaypointVisualizer() : Node("waypoint_visualizer_node") {
-    this->declare_parameter("waypoints_path", "/sim_ws/src/pure_pursuit/racelines/e7_floor5.csv");
+    this->declare_parameter("waypoints_path", "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/31march.csv");
     this->declare_parameter("rviz_waypoints_topic", "/waypoints");
 
     waypoints_path = this->get_parameter("waypoints_path").as_string();
     rviz_waypoints_topic = this->get_parameter("rviz_waypoints_topic").as_string();
 
     vis_path_pub = this->create_publisher<visualization_msgs::msg::MarkerArray>(rviz_waypoints_topic, 1000);
-    timer_ = this->create_wall_timer(2000ms, std::bind(&WaypointVisualizer::timer_callback, this));
+    timer_ = this->create_wall_timer(20ms, std::bind(&WaypointVisualizer::timer_callback, this));
 
     RCLCPP_INFO(this->get_logger(), "this node has been launched");
     download_waypoints();
@@ -97,6 +97,7 @@ void WaypointVisualizer::timer_callback() {
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto node_ptr = std::make_shared<WaypointVisualizer>();  // initialise node pointer
+    rclcpp::Rate loop_rate(100);
     rclcpp::spin(node_ptr);
     rclcpp::shutdown();
     return 0;

@@ -25,7 +25,7 @@
 
 PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
     // initialise parameters
-    this->declare_parameter("waypoints_path", "/sim_ws/src/pure_pursuit/racelines/e7_floor5.csv");
+    this->declare_parameter("waypoints_path", "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/31march.csv");
     this->declare_parameter("odom_topic", "/ego_racecar/odom");
     this->declare_parameter("car_refFrame", "ego_racecar/base_link");
     this->declare_parameter("drive_topic", "/drive");
@@ -169,10 +169,15 @@ void PurePursuit::get_waypoint() {
     double longest_distance = 0;
     int final_i = -1;
     int start = waypoints.index;
-    int end = (waypoints.index + 500) % num_waypoints;
+    // int end = (waypoints.index + 500) % num_waypoints;
+    int end = (waypoints.index + num_waypoints - 1) % num_waypoints;
+
 
     // Lookahead needs to be between the min_lookhead and the max_lookahead
+    
     double lookahead = std::min(std::max(min_lookahead, max_lookahead * curr_velocity / lookahead_ratio), max_lookahead);
+    RCLCPP_INFO(this->get_logger(), "start: %d, end: %d, lookahead: %.2f, velocity: %.4f ", start, end,lookahead,curr_velocity);
+    //RCLCPP_INFO(this->get_logger(), "start: %d, end: %d, lookahead: %.2f ", start, end,lookahead);
 
     if (end < start) {  // If we need to loop around
         for (int i = start; i < num_waypoints; i++) {
@@ -299,7 +304,7 @@ void PurePursuit::publish_message(double steering_angle) {
     curr_velocity = get_velocity(drive_msgObj.drive.steering_angle);
     drive_msgObj.drive.speed = curr_velocity;
 
-    RCLCPP_INFO(this->get_logger(), "index: %d ... distance: %.2fm ... Speed: %.2fm/s ... Steering Angle: %.2f ... K_p: %.2f ... velocity_percentage: %.2f", waypoints.index, p2pdist(waypoints.X[waypoints.index], x_car_world, waypoints.Y[waypoints.index], y_car_world), drive_msgObj.drive.speed, to_degrees(drive_msgObj.drive.steering_angle), K_p, velocity_percentage);
+    //RCLCPP_INFO(this->get_logger(), "index: %d ... distance: %.2fm ... Speed: %.2fm/s ... Steering Angle: %.2f ... K_p: %.2f ... velocity_percentage: %.2f", waypoints.index, p2pdist(waypoints.X[waypoints.index], x_car_world, waypoints.Y[waypoints.index], y_car_world), drive_msgObj.drive.speed, to_degrees(drive_msgObj.drive.steering_angle), K_p, velocity_percentage);
 
     publisher_drive->publish(drive_msgObj);
 }
@@ -307,6 +312,8 @@ void PurePursuit::publish_message(double steering_angle) {
 void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
     x_car_world = odom_submsgObj->pose.pose.position.x;
     y_car_world = odom_submsgObj->pose.pose.position.y;
+
+    //RCLCPP_INFO(this->get_logger(), "x_car_World: %.2f, y_car_World: %.2f", x_car_world, y_car_world);
     // interpolate between different way-points
     get_waypoint();
 
@@ -333,7 +340,7 @@ void PurePursuit::timer_callback() {
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto node_ptr = std::make_shared<PurePursuit>();  // initialise node pointer
-    rclcpp::Rate loop_rate(100);
+    // rclcpp::Rate loop_rate(50);
     rclcpp::spin(node_ptr);
     rclcpp::shutdown();
     return 0;
