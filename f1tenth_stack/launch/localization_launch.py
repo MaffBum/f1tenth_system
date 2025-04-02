@@ -64,7 +64,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'map',
-            default_value='/home/f1jetson/f1tenth_ws/src/f1tenth_system/f1tenth_stack/maps/31march.yaml',
+            default_value='/home/f1jetson/f1tenth_ws/src/f1tenth_system/f1tenth_stack/maps/2April.yaml',
             description='Full path to map yaml file to load'),
 
         DeclareLaunchArgument(
