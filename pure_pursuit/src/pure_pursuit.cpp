@@ -54,8 +54,11 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
     steering_limit = this->get_parameter("steering_limit").as_double();
     velocity_percentage = this->get_parameter("velocity_percentage").as_double();
 
-    subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
-    timer_ = this->create_wall_timer(20ms, std::bind(&PurePursuit::timer_callback, this));
+    //subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(odom_topic, 25, std::bind(&PurePursuit::odom_callback, this, _1));
+    timer_ = this->create_wall_timer(2000ms, std::bind(&PurePursuit::timer_callback, this));
+
+    control_timer_ = this->create_wall_timer(20ms, std::bind(&PurePursuit::control_loop, this));  // ~50 Hz
+
 
     publisher_drive = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>(drive_topic, 25);
     vis_current_point_pub = this->create_publisher<visualization_msgs::msg::Marker>(rviz_current_waypoint_topic, 10);
@@ -169,14 +172,14 @@ void PurePursuit::get_waypoint() {
     double longest_distance = 0;
     int final_i = -1;
     int start = waypoints.index;
-    // int end = (waypoints.index + 500) % num_waypoints;
-    int end = (waypoints.index + num_waypoints - 1) % num_waypoints;
+    int end = (waypoints.index + 20) % num_waypoints; // 10 works
+    //int end = (waypoints.index + num_waypoints - 1) % num_waypoints;
 
 
     // Lookahead needs to be between the min_lookhead and the max_lookahead
     
     double lookahead = std::min(std::max(min_lookahead, max_lookahead * curr_velocity / lookahead_ratio), max_lookahead);
-    RCLCPP_INFO(this->get_logger(), "start: %d, end: %d, lookahead: %.2f, velocity: %.4f ", start, end,lookahead,curr_velocity);
+    RCLCPP_INFO(this->get_logger(), "start: %d, end: %d", start, end);
     //RCLCPP_INFO(this->get_logger(), "start: %d, end: %d, lookahead: %.2f ", start, end,lookahead);
 
     if (end < start) {  // If we need to loop around
@@ -202,6 +205,7 @@ void PurePursuit::get_waypoint() {
     }
 
     if (final_i == -1) {  // if we haven't found anything, search from the beginning
+        RCLCPP_INFO(this->get_logger(), "HAVE NOT FOUND ANYTHING");
         final_i = 0;
         for (int i = 0; i < num_waypoints; i++) {
             if (p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) <= lookahead && p2pdist(waypoints.X[i], x_car_world, waypoints.Y[i], y_car_world) >= longest_distance) {
@@ -309,10 +313,18 @@ void PurePursuit::publish_message(double steering_angle) {
     publisher_drive->publish(drive_msgObj);
 }
 
-void PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
-    x_car_world = odom_submsgObj->pose.pose.position.x;
-    y_car_world = odom_submsgObj->pose.pose.position.y;
-
+void PurePursuit::control_loop() {//PurePursuit::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj) {
+    //x_car_world = odom_submsgObj->pose.pose.position.x;
+    //y_car_world = odom_submsgObj->pose.pose.position.y;
+    geometry_msgs::msg::TransformStamped tf_map_to_base;
+    try {
+        tf_map_to_base = tf_buffer_->lookupTransform("map", "base_link", tf2::TimePointZero);
+        x_car_world = tf_map_to_base.transform.translation.x;
+        y_car_world = tf_map_to_base.transform.translation.y;
+    } catch (tf2::TransformException &ex) {
+        RCLCPP_WARN(this->get_logger(), "TF lookup failed: %s", ex.what());
+        return;
+    }
     //RCLCPP_INFO(this->get_logger(), "x_car_World: %.2f, y_car_World: %.2f", x_car_world, y_car_world);
     // interpolate between different way-points
     get_waypoint();

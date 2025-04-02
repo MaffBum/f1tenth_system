@@ -80,6 +80,8 @@ class PurePursuit : public rclcpp::Node {
 
     // Timer initialisation
     rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::TimerBase::SharedPtr control_timer_;
+
 
     // declare subscriber sharedpointer obj
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_odom;
@@ -119,4 +121,6 @@ class PurePursuit : public rclcpp::Node {
     void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_submsgObj);
 
     void timer_callback();
+
+    void control_loop();
 };

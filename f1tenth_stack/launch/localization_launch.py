@@ -64,7 +64,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'map',
-            default_value=os.path.join(bringup_dir, 'maps', 'turtlebot3_world.yaml'),
+            default_value='/home/f1jetson/f1tenth_ws/src/f1tenth_system/f1tenth_stack/maps/31march.yaml',
             description='Full path to map yaml file to load'),
 
         DeclareLaunchArgument(
