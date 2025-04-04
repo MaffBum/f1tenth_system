@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 from scipy.ndimage import label, binary_dilation
 
-def filter_with_expanded_black(input_file, output_file, dilation_radius=5):
+def filter_with_expanded_black(input_file, output_file, dilation_radius=2):
     # Load the PGM file
     img = Image.open(input_file)
     
@@ -39,7 +39,7 @@ def filter_with_expanded_black(input_file, output_file, dilation_radius=5):
     output_img.save(output_file)
 
 # Example usage with a dilation radius of 5 pixels:
-input_path = '/home/capstone/f1host_ws/src/f1tenth_system/f1tenth_stack/maps/4April.pgm'  # Replace with the path to your input PGM file
-output_path = '/home/capstone/f1host_ws/src/f1tenth_system/f1tenth_stack/maps/4April.pgm'  # Replace with the desired output PGM file path
+input_path = '/home/capstone/f1host_ws/src/f1tenth_system/f1tenth_stack/maps/4AprilGrandPrix.pgm'  # Replace with the path to your input PGM file
+output_path = '/home/capstone/f1host_ws/src/f1tenth_system/f1tenth_stack/maps/4AprilGrandPrix.pgm'  # Replace with the desired output PGM file path
 
 filter_with_expanded_black(input_path, output_path)
