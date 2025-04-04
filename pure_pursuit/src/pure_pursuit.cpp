@@ -179,7 +179,7 @@ void PurePursuit::get_waypoint() {
     // Lookahead needs to be between the min_lookhead and the max_lookahead
     
     double lookahead = std::min(std::max(min_lookahead, max_lookahead * curr_velocity / lookahead_ratio), max_lookahead);
-    RCLCPP_INFO(this->get_logger(), "start: %d, end: %d", start, end);
+    //RCLCPP_INFO(this->get_logger(), "start: %d, end: %d", start, end);
     //RCLCPP_INFO(this->get_logger(), "start: %d, end: %d, lookahead: %.2f ", start, end,lookahead);
 
     if (end < start) {  // If we need to loop around
