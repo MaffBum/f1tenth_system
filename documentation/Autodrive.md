@@ -30,17 +30,17 @@ xhost local:root
 
 Run the container at entrypoint
 ```bash
-docker run --name autodrive_f1tenth_devkit   --rm -it   --entrypoint /bin/bash   --network=host   --ipc=host   -v /tmp/.X11-unix:/tmp/.X11-unix:rw   --env DISPLAY   --privileged   --gpus all   -v /home/f1tenth/autodrive_ws:/home/autodrive_ws   autodrive_f1tenth_devkit:local-latest
+docker run --name autodrive_f1tenth_devkit   --rm -it   --network=host   --ipc=host   -v /tmp/.X11-unix:/tmp/.X11-unix:rw   --env ROS_LOCALHOST_ONLY=0   --env DISPLAY   --privileged   --gpus all   -v /home/f1tenth/f1tenth_ws/src/f1tenth_system:/home/autodrive_devkit/src/f1tenth_system   autodrive_f1tenth_devkit:local-latest
 ```
 
-To bringup rviz
+Rviz should launch automatically. But to bringup rviz you can run:
 ```bash
 ros2 launch autodrive_f1tenth simulator_bringup_rviz.launch.py
 ```
 
 Start additional bash session(s) within the container (each in a new terminal window):
 ```bash
-docker exec -it autodrive_f1tenth_api bash
+docker exec -it autodrive_f1tenth_devkit bash
 ```
 
 Note this has been added in the dockerfile to allow communication from the ros2 foxy container running on the PC and the devkit container.
@@ -75,3 +75,7 @@ ros2 run gap_follow test_node.py --ros-args --remap /scan:=/autodrive/f1tenth_1/
 This way we avoid directly editing the existing `autodrive_bridge` and our code will still publish to the `drive` topic. This means it should still work on the gym and the real car.
 
 You can check communication by running the talker/listener nodes or checking rqt_graph once launching a node.
+
+[See this for more details](https://autodrive-ecosystem.github.io/competitions/f1tenth-sim-racing-guide/#21-system-requirements)
+
+[For comp rules see here](https://autodrive-ecosystem.github.io/competitions/f1tenth-sim-racing-rules/#3-submission-guidelines)
