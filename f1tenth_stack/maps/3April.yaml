@@ -1,4 +1,4 @@
-image: /home/capstone/f1host_ws/src/f1tenth_system/f1tenth_stack/maps/3April.pgm
+image: ./3April.pgm
 mode: trinary
 resolution: 0.05
 origin: [-6.32, -2.07, 0]
