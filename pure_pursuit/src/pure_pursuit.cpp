@@ -27,7 +27,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_node") {
     // initialise parameters
     this->declare_parameter("waypoints_path", "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/31march.csv");
     this->declare_parameter("odom_topic", "/ego_racecar/odom");
-    this->declare_parameter("car_refFrame", "ego_racecar/base_link");
+    this->declare_parameter("car_refFrame", "ego_racecar/laser");
     this->declare_parameter("drive_topic", "/drive");
     this->declare_parameter("rviz_current_waypoint_topic", "/current_waypoint");
     this->declare_parameter("rviz_lookahead_waypoint_topic", "/lookahead_waypoint");
@@ -318,7 +318,7 @@ void PurePursuit::control_loop() {//PurePursuit::odom_callback(const nav_msgs::m
     //y_car_world = odom_submsgObj->pose.pose.position.y;
     geometry_msgs::msg::TransformStamped tf_map_to_base;
     try {
-        tf_map_to_base = tf_buffer_->lookupTransform("map", "base_link", tf2::TimePointZero);
+        tf_map_to_base = tf_buffer_->lookupTransform("map", "laser", tf2::TimePointZero);
         x_car_world = tf_map_to_base.transform.translation.x;
         y_car_world = tf_map_to_base.transform.translation.y;
     } catch (tf2::TransformException &ex) {
