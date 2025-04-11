@@ -1,6 +1,6 @@
 pure_pursuit:
   ros__parameters:
-    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/7April.csv"
+    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/7AprilGP.csv"
     odom_topic: "/odom"
     car_refFrame: "laser"
     global_refFrame: "map"
@@ -27,8 +27,8 @@ pure_pursuit:
 
     K_p: 0.3
     steering_limit: 25.0
-    velocity_percentage: 1.0 # the limit, can only do 1 lap with clean tires    
+    velocity_percentage: 0.7 # the limit, can only do 1 lap with clean tires    
 
 waypoint_visualizer_node:
   ros__parameters:
-    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/7April.csv"
+    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/7AprilGP.csv"
