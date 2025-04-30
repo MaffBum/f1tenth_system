@@ -1,6 +1,6 @@
 pure_pursuit:
   ros__parameters:
-    waypoints_path: "/sim_ws/src/pure_pursuit/racelines/e7_floor5_square.csv"
+    waypoints_path: "/home/nathan/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/7AprilGP.csv"
     odom_topic: "/ego_racecar/odom"
     car_refFrame: "ego_racecar/base_link"
     global_refFrame: "map"
@@ -19,4 +19,4 @@ pure_pursuit:
 
 waypoint_visualizer_node:
   ros__parameters:
-    waypoints_path: "/sim_ws/src/pure_pursuit/racelines/e7_floor5_square.csv"
+    waypoints_path: "/home/nathan/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/7AprilGP.csv"
