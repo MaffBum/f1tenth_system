@@ -1,2 +1,3 @@
+run this node after running your rviz simulator, otherwise the /tf topic will not exist
 node can be run with the following command: ros2 run tf_listener tf_logger
-NOTE: the resulting safe file will be saved at the current directory of where you run the tf_listener node.
+NOTE: the resulting csv file will be saved at the current directory of where you run the tf_listener node.
