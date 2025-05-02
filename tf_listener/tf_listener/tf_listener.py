@@ -16,25 +16,25 @@ class TFLogger(Node):
             10
         )
 
-        self.csv_file = open('tf_data.csv', 'w', newline='')
+        # Open CSV without writing headers
+        self.csv_file = open('./tf_listener/data/tf_data.csv', 'w', newline='')
         self.writer = csv.writer(self.csv_file)
-        self.writer.writerow(['timestamp_s', 'x', 'y'])
         atexit.register(self.csv_file.close)
 
-        self.get_logger().info('tf_logger node started, logging to tf_data.csv.')
+        self.get_logger().info('tf_logger node started, logging x,y to tf_data.csv.')
 
     def tf_callback(self, msg: TFMessage):
         for t in msg.transforms:
-            # only record the car’s base_link frame
             if t.child_frame_id != 'ego_racecar/base_link':
                 continue
 
-            ts = t.header.stamp.sec + t.header.stamp.nanosec * 1e-9
             x = t.transform.translation.x
             y = t.transform.translation.y
 
-            self.writer.writerow([f'{ts:.9f}', x, y])
-            self.get_logger().info(f"[{ts:.3f}] x={x:.3f}, y={y:.3f}")
+            # write only x,y
+            self.writer.writerow([x, y])
+            # optional log
+            self.get_logger().info(f"x={x:.3f}, y={y:.3f}")
 
 def main(args=None):
     rclpy.init(args=args)
