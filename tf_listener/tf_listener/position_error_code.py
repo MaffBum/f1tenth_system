@@ -42,8 +42,8 @@ def compute_errors(theoretical_x, theoretical_y, actual_x, actual_y):
 def main():
     # Paths for the csvs for raceline and the actual car locations.
     # run from f1tenth_system directory
-    theoretical_path = './pure_pursuit/racelines/7AprilGP.csv'
-    actual_path = './tf_listener/data/tf_data.csv'
+    theoretical_path = './pure_pursuit/racelines/7AprilGP.csv' # raceline from raceline optimisation code
+    actual_path = './tf_listener/data/tf_data.csv' # true position from tf_listener
 
     # Load both racelines
     theo_x, theo_y = load_csv(theoretical_path)
