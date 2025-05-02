@@ -42,7 +42,7 @@ def compute_errors(theoretical_x, theoretical_y, actual_x, actual_y):
 def main():
     # Paths for the csvs for raceline and the actual car locations.
     theoretical_path = '/home/henry/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/7AprilGP.csv'
-    actual_path = '/home/henry/f1tenth_ws/src/f1tenth_system/tf_listener/tf_listener/7AprilGP_actualraw.csv'
+    actual_path = '/home/henry/f1tenth_ws/src/f1tenth_system/tf_listener/data/7AprilGP_actualraw.csv'
 
     # Load both racelines
     theo_x, theo_y = load_csv(theoretical_path)
