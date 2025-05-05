@@ -1,4 +1,4 @@
-image: ./11AprilGP.pgm
+image: /home/f1jetson/f1tenth_ws/src/f1tenth_system/particle_filter/maps/11AprilGP.pgm
 mode: trinary
 resolution: 0.05
 origin: [-2.58, -5.29, 0]
