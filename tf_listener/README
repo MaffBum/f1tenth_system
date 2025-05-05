@@ -1,0 +1,13 @@
+TF_LISTENER:
+this code records the true x y position of the car in rviz simulation and prints it to a csv file
+run this node after running your rviz simulator, otherwise the /tf topic will not exist
+make sure node is run from root of repo (f1tenth_system)
+node can be run with the following command: ros2 run tf_listener tf_logger
+the resulting csv file will be saved at tf_listener/data
+
+POSITION_ERROR_CODE:
+open in vscode, and make sure to cd into f1tenth_system
+simply run in csvode
+theoretical path = raceline from raceline optimisation code
+actual path = true position from tf_listener
+

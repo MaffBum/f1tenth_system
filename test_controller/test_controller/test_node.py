@@ -7,13 +7,12 @@ import numpy as np
 
 
 class GapFollower(Node):    
-    # Constants for gap following behavior
-    BUBBLE_RADIUS = 50  # Reduce the radius to allow better detection of gaps
-    PREPROCESS_CONV_SIZE = 3 # Size for convolution filter during preprocessing
+    BUBBLE_RADIUS = 100  # Reduce the radius to allow better detection of gaps
+    PREPROCESS_CONV_SIZE = 3  # Size for convolution filter during preprocessing
     BEST_POINT_CONV_SIZE = 80  # Size for averaging in the best point detection
     MAX_LIDAR_DIST = 3.0  # Maximum distance to consider from the LiDAR
-    STRAIGHTS_SPEED = 1.0# Speed while driving straight
-    CORNERS_SPEED = 0.8  # Speed while turning
+    STRAIGHTS_SPEED = 5.0  # Speed while driving straight
+    CORNERS_SPEED = 3.0  # Speed while turning
     STRAIGHTS_STEERING_ANGLE = np.pi / 18  # Steering angle threshold for straights
 
     def __init__(self):
