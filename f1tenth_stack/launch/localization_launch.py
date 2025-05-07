@@ -26,6 +26,7 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('f1tenth_stack')
+    map_name = 'blob1'
 
     namespace = LaunchConfiguration('namespace')
     map_yaml_file = LaunchConfiguration('map')
@@ -64,7 +65,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'map',
-            default_value='/home/f1jetson/f1tenth_ws/src/f1tenth_system/f1tenth_stack/maps/7April.yaml',
+            default_value= '/home/capstone/f1host_ws/src/f1tenth_system/f1tenth_stack/maps/blob1.yaml', #os.path.join(bringup_dir,'maps',map_name),   
             description='Full path to map yaml file to load'),
 
         DeclareLaunchArgument(
