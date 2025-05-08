@@ -43,18 +43,18 @@ def compute_errors(theoretical_x, theoretical_y, actual_x, actual_y):
     distances, indices = tree.query(np.c_[theoretical_x, theoretical_y])
     return distances, indices
 
-# def compute_velocity(timestamps, x, y, dt=0.1):
-#     t_uniform = np.arange(timestamps[0], timestamps[-1], dt)
-#     x_interp = interp1d(timestamps, x, kind='linear')(t_uniform)
-#     y_interp = interp1d(timestamps, y, kind='linear')(t_uniform)
+def compute_velocity(timestamps, x, y, dt=0.1):
+    t_uniform = np.arange(timestamps[0], timestamps[-1], dt)
+    x_interp = interp1d(timestamps, x, kind='linear')(t_uniform)
+    y_interp = interp1d(timestamps, y, kind='linear')(t_uniform)
 
-#     dx = np.diff(x_interp)
-#     dy = np.diff(y_interp)
-#     speed = np.sqrt(dx**2 + dy**2) / dt
+    dx = np.diff(x_interp)
+    dy = np.diff(y_interp)
+    speed = np.sqrt(dx**2 + dy**2) / dt
 
-#     # Pad to match the number of points
-#     speed = np.append(speed, speed[-1])
-#     return t_uniform, x_interp, y_interp, speed
+    # Pad to match the number of points
+    speed = np.append(speed, speed[-1])
+    return t_uniform, x_interp, y_interp, speed
 
 
 def compute_velocity_savgol(timestamps, x, y, window=11, poly=3):
@@ -83,10 +83,11 @@ def main():
     timestamps, act_x_raw, act_y_raw = load_csv(actual_path)
 
     # Get interpolated velocity at 0.1s intervals
-    t_uniform, velocity = compute_velocity_savgol(timestamps, act_x_raw, act_y_raw)
+    # t_uniform, velocity = compute_velocity_savgol(timestamps, act_x_raw, act_y_raw)
+    t_uniform, x_uniform, y_uniform, velocity = compute_velocity(timestamps, act_x_raw, act_y_raw)
 
     # Optionally average this x/y for raceline
-    act_x, act_y = lap_average(act_x_raw, act_y_raw)
+    act_x, act_y = lap_average(x_uniform, y_uniform)
 
     # act_x, act_y = lap_average(act_x_raw, act_y_raw)
 
@@ -108,7 +109,7 @@ def main():
     print(f"  Std Dev: {std_e:.4f} m")
 
     theo_interp = interp1d(np.linspace(0, 1, len(theo_v)), theo_v, kind='linear', fill_value="extrapolate")
-    actual_interp = interp1d(np.linspace(0, 1, len(velocity)), matched_act_v, kind='linear', fill_value="extrapolate")
+    actual_interp = interp1d(np.linspace(0, 1, len(matched_act_v)), matched_act_v, kind='linear', fill_value="extrapolate")
     N = min(len(theo_v), len(velocity))
     idx = np.linspace(0, 1, N)
     theo_v_resampled = theo_interp(idx)
