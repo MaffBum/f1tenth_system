@@ -5,7 +5,7 @@ from scipy.signal import find_peaks
 
 def load_csv(filepath):
     data = np.loadtxt(filepath, delimiter=',')
-    return data[:, 0], data[:, 1]
+    return data[:, 0], data[:, 1], data[:, 2]
 
 def lap_average(x, y, num_bins=500):
     # Compute angles from the track center (assumes loop around origin)
@@ -39,6 +39,20 @@ def compute_errors(theoretical_x, theoretical_y, actual_x, actual_y):
     distances, _ = tree.query(np.c_[theoretical_x, theoretical_y])
     return distances
 
+def compute_velocity(timestamps, x, y, dt=0.1):
+    t_uniform = np.arange(timestamps[0], timestamps[-1], dt)
+    x_interp = interp1d(timestamps, x, kind='linear')(t_uniform)
+    y_interp = interp1d(timestamps, y, kind='linear')(t_uniform)
+
+    dx = np.diff(x_interp)
+    dy = np.diff(y_interp)
+    speed = np.sqrt(dx**2 + dy**2) / dt
+
+    # Pad to match the number of points
+    speed = np.append(speed, speed[-1])
+    return t_uniform, x_interp, y_interp, speed
+
+
 def main():
     # Paths for the csvs for raceline and the actual car locations.
     # run from f1tenth_system directory
@@ -46,11 +60,12 @@ def main():
     actual_path = './tf_listener/data/tf_data.csv' # true position from tf_listener
 
     # Load both racelines
-    theo_x, theo_y = load_csv(theoretical_path)
-    act_x_raw, act_y_raw = load_csv(actual_path)
+    theo_x, theo_y, theo_v = load_csv(theoretical_path)
+    act_t_raw, act_x_raw, act_y_raw = load_csv(actual_path)
 
     # Average actual raceline (remove multi-lap data)
     act_x, act_y = lap_average(act_x_raw, act_y_raw)
+    
 
     # Compute position errors
     errors = compute_errors(theo_x, theo_y, act_x, act_y)
