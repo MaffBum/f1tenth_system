@@ -75,7 +75,7 @@ def main():
     # run from f1tenth_system directory
     velocity_scale = 0.9
 
-    theoretical_path = './pure_pursuit/racelines/7AprilGP.csv' # raceline from raceline optimisation code
+    theoretical_path = './pure_pursuit/racelines/U_GP.csv' # raceline from raceline optimisation code
     actual_path = './tf_listener/data/tf_data.csv' # true position from tf_listener
 
     # Load both racelines
@@ -83,10 +83,10 @@ def main():
     timestamps, act_x_raw, act_y_raw = load_csv(actual_path)
 
     # Get interpolated velocity at 0.1s intervals
-    t_uniform, x_uniform, y_uniform, velocity = compute_velocity(timestamps, act_x_raw, act_y_raw)
+    t_uniform, velocity = compute_velocity_savgol(timestamps, act_x_raw, act_y_raw)
 
     # Optionally average this x/y for raceline
-    act_x, act_y = lap_average(x_uniform, y_uniform)
+    act_x, act_y = lap_average(act_x_raw, act_y_raw)
 
     # act_x, act_y = lap_average(act_x_raw, act_y_raw)
 
