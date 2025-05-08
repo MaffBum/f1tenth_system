@@ -11,6 +11,29 @@ def load_csv(filepath):
     data = np.loadtxt(filepath, delimiter=',')
     return data[:, 0], data[:, 1], data[:, 2]
 
+def compute_actual_lap_times(timestamps, x, y, distance_threshold=1.0):
+    # Define start/finish line as the first point
+    x0, y0 = x[0], y[0]
+    dists = np.sqrt((x - x0)**2 + (y - y0)**2)
+
+    # Find local minima where car returns near start
+    # Invert distance to find valleys (i.e., close to start)
+    peaks, _ = find_peaks(-dists, distance=20, prominence=0.1)
+
+    # Filter only those actually within threshold
+    crossings = peaks[dists[peaks] < distance_threshold]
+    
+    # Need at least two to define one full lap
+    if len(crossings) < 2:
+        print("Not enough laps found!")
+        return None, None
+
+    lap_times = np.diff(timestamps[crossings])
+    average_lap_time = np.mean(lap_times)
+
+    return average_lap_time, lap_times
+
+
 def lap_average(x, y, num_bins=500):
     # Compute angles from the track center (assumes loop around origin)
     angles = np.arctan2(y - np.mean(y), x - np.mean(x))
@@ -68,6 +91,14 @@ def compute_velocity_savgol(timestamps, x, y, window=11, poly=3):
     speed = np.sqrt(dx**2 + dy**2)
     return timestamps, speed
 
+def compute_lap_time_from_velocity(x, y, v):
+    dx = np.diff(x)
+    dy = np.diff(y)
+    ds = np.sqrt(dx**2 + dy**2)
+    avg_v = (v[:-1] + v[1:]) / 2  # average velocity per segment
+    dt = ds / avg_v
+    return np.sum(dt)
+
 
 
 def main():
@@ -124,6 +155,22 @@ def main():
     print(f"  Mean   : {np.mean(v_error):.4f} m/s")
     print(f"  Median : {np.median(v_error):.4f} m/s")
     print(f"  Std Dev: {np.std(v_error):.4f} m/s")
+
+    # Compute actual lap time
+    actual_lap_time, all_lap_times = compute_actual_lap_times(timestamps, act_x_raw, act_y_raw)
+
+    # Compute theoretical lap time
+    theoretical_lap_time = compute_lap_time_from_velocity(theo_x, theo_y, theo_v)
+
+    print(f"\nLap Time Comparison:")
+    if actual_lap_time is not None:
+        print(f"  Actual Avg Lap Time     : {actual_lap_time:.2f} s over {len(all_lap_times)} laps")
+    else:
+        print("  Actual Lap Time         : Not enough laps detected")
+
+    print(f"  Theoretical Lap Time    : {theoretical_lap_time:.2f} s")
+    if actual_lap_time is not None:
+        print(f"  Difference               : {actual_lap_time - theoretical_lap_time:.2f} s")
 
     # Plot
     # Position error plot
