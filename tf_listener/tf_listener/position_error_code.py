@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.spatial import cKDTree
 from scipy.signal import find_peaks
 from scipy.interpolate import interp1d
+from scipy.signal import savgol_filter
+
 
 
 def load_csv(filepath):
@@ -41,18 +43,31 @@ def compute_errors(theoretical_x, theoretical_y, actual_x, actual_y):
     distances, _ = tree.query(np.c_[theoretical_x, theoretical_y])
     return distances
 
-def compute_velocity(timestamps, x, y, dt=0.1):
-    t_uniform = np.arange(timestamps[0], timestamps[-1], dt)
-    x_interp = interp1d(timestamps, x, kind='linear')(t_uniform)
-    y_interp = interp1d(timestamps, y, kind='linear')(t_uniform)
+# def compute_velocity(timestamps, x, y, dt=0.1):
+#     t_uniform = np.arange(timestamps[0], timestamps[-1], dt)
+#     x_interp = interp1d(timestamps, x, kind='linear')(t_uniform)
+#     y_interp = interp1d(timestamps, y, kind='linear')(t_uniform)
 
-    dx = np.diff(x_interp)
-    dy = np.diff(y_interp)
-    speed = np.sqrt(dx**2 + dy**2) / dt
+#     dx = np.diff(x_interp)
+#     dy = np.diff(y_interp)
+#     speed = np.sqrt(dx**2 + dy**2) / dt
 
-    # Pad to match the number of points
-    speed = np.append(speed, speed[-1])
-    return t_uniform, x_interp, y_interp, speed
+#     # Pad to match the number of points
+#     speed = np.append(speed, speed[-1])
+#     return t_uniform, x_interp, y_interp, speed
+
+
+def compute_velocity_savgol(timestamps, x, y, window=11, poly=3):
+    dt = np.mean(np.diff(timestamps))  # Approximate dt
+
+    x_smooth = savgol_filter(x, window, poly)
+    y_smooth = savgol_filter(y, window, poly)
+    dx = savgol_filter(x, window, poly, deriv=1, delta=dt)
+    dy = savgol_filter(y, window, poly, deriv=1, delta=dt)
+
+    speed = np.sqrt(dx**2 + dy**2)
+    return timestamps, speed
+
 
 
 def main():
