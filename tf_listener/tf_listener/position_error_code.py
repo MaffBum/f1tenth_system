@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import cKDTree
 from scipy.signal import find_peaks
+from scipy.interpolate import interp1d
+
 
 def load_csv(filepath):
     data = np.loadtxt(filepath, delimiter=',')
@@ -56,16 +58,23 @@ def compute_velocity(timestamps, x, y, dt=0.1):
 def main():
     # Paths for the csvs for raceline and the actual car locations.
     # run from f1tenth_system directory
+    velocity_scale = 0.9
+
     theoretical_path = './pure_pursuit/racelines/7AprilGP.csv' # raceline from raceline optimisation code
     actual_path = './tf_listener/data/tf_data.csv' # true position from tf_listener
 
     # Load both racelines
     theo_x, theo_y, theo_v = load_csv(theoretical_path)
-    act_t_raw, act_x_raw, act_y_raw = load_csv(actual_path)
+    timestamps, act_x_raw, act_y_raw = load_csv(actual_path)
 
-    # Average actual raceline (remove multi-lap data)
-    act_x, act_y = lap_average(act_x_raw, act_y_raw)
-    
+    # Get interpolated velocity at 0.1s intervals
+    t_uniform, x_uniform, y_uniform, velocity = compute_velocity(timestamps, act_x_raw, act_y_raw)
+
+    # Optionally average this x/y for raceline
+    act_x, act_y = lap_average(x_uniform, y_uniform)
+
+    # act_x, act_y = lap_average(act_x_raw, act_y_raw)
+
 
     # Compute position errors
     errors = compute_errors(theo_x, theo_y, act_x, act_y)
@@ -82,7 +91,25 @@ def main():
     print(f"  Median : {median_e:.4f} m")
     print(f"  Std Dev: {std_e:.4f} m")
 
+    theo_interp = interp1d(np.linspace(0, 1, len(theo_v)), theo_v, kind='linear', fill_value="extrapolate")
+    actual_interp = interp1d(np.linspace(0, 1, len(velocity)), velocity, kind='linear', fill_value="extrapolate")
+    N = min(len(theo_v), len(velocity))
+    idx = np.linspace(0, 1, N)
+    theo_v_resampled = theo_interp(idx)
+    actual_v_resampled = actual_interp(idx)
+
+    scaled_theo_v = theo_v_resampled * velocity_scale
+    v_error = actual_v_resampled - scaled_theo_v
+
+    print(f"\nVelocity Errors (after applying velocity_scale={velocity_scale}):")
+    print(f"  Max    : {np.max(v_error):.4f} m/s")
+    print(f"  Min    : {np.min(v_error):.4f} m/s")
+    print(f"  Mean   : {np.mean(v_error):.4f} m/s")
+    print(f"  Median : {np.median(v_error):.4f} m/s")
+    print(f"  Std Dev: {np.std(v_error):.4f} m/s")
+
     # Plot
+    # Position error plot
     fig, ax = plt.subplots()
     sc = ax.scatter(theo_x, theo_y, c=errors, cmap='viridis', s=10, label='Theoretical Raceline')
     ax.plot(act_x, act_y, 'r-', label='Actual Raceline (Averaged)')
@@ -93,6 +120,18 @@ def main():
     ax.legend()
     ax.axis('equal')
     plt.grid(True)
+
+    # Velocity comparison plot
+    plt.figure()
+    plt.plot(idx, actual_v_resampled, label='Actual Velocity')
+    plt.plot(idx, scaled_theo_v, label=f'Scaled Theoretical Velocity (×{velocity_scale})')
+    plt.plot(idx, v_error, label='Velocity Error', linestyle='--')
+    plt.xlabel('Normalized Path Index')
+    plt.ylabel('Velocity (m/s)')
+    plt.title('Velocity Comparison')
+    plt.legend()
+    plt.grid(True)
+
     plt.show()
 
 if __name__ == '__main__':
