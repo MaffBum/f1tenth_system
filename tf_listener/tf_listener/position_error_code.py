@@ -160,7 +160,7 @@ def main():
     actual_lap_time, all_lap_times = compute_actual_lap_times(timestamps, act_x_raw, act_y_raw)
 
     # Compute theoretical lap time
-    theoretical_lap_time = compute_lap_time_from_velocity(theo_x, theo_y, theo_v)
+    theoretical_lap_time = compute_lap_time_from_velocity(theo_x, theo_y, theo_v*velocity_scale)
 
     print(f"\nLap Time Comparison:")
     if actual_lap_time is not None:
