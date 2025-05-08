@@ -10,7 +10,7 @@ particle_filter:
     squash_factor: 2.2
     # visualization
     viz: 1
-    max_viz_particles: 60
+    max_viz_particles: 1000
     # ray marching method
     range_method: 'rmgpu'
     theta_discretization: 90 #112
