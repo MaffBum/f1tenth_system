@@ -40,8 +40,8 @@ def lap_average(x, y, num_bins=500):
 
 def compute_errors(theoretical_x, theoretical_y, actual_x, actual_y):
     tree = cKDTree(np.c_[actual_x, actual_y])
-    distances, _ = tree.query(np.c_[theoretical_x, theoretical_y])
-    return distances
+    distances, indices = tree.query(np.c_[theoretical_x, theoretical_y])
+    return distances, indices
 
 # def compute_velocity(timestamps, x, y, dt=0.1):
 #     t_uniform = np.arange(timestamps[0], timestamps[-1], dt)
@@ -92,7 +92,8 @@ def main():
 
 
     # Compute position errors
-    errors = compute_errors(theo_x, theo_y, act_x, act_y)
+    errors, match_indices = compute_errors(theo_x, theo_y, act_x, act_y)
+    matched_act_v = velocity[match_indices]
     max_e = np.max(errors)
     min_e = np.min(errors)
     mean_e = np.mean(errors)
@@ -107,7 +108,7 @@ def main():
     print(f"  Std Dev: {std_e:.4f} m")
 
     theo_interp = interp1d(np.linspace(0, 1, len(theo_v)), theo_v, kind='linear', fill_value="extrapolate")
-    actual_interp = interp1d(np.linspace(0, 1, len(velocity)), velocity, kind='linear', fill_value="extrapolate")
+    actual_interp = interp1d(np.linspace(0, 1, len(velocity)), matched_act_v, kind='linear', fill_value="extrapolate")
     N = min(len(theo_v), len(velocity))
     idx = np.linspace(0, 1, N)
     theo_v_resampled = theo_interp(idx)
