@@ -65,11 +65,11 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'map',
-            default_value=os.path.join(bringup_dir,'maps','blob1.yaml'),   
+            default_value= '/home/capstone/f1host_ws/src/f1tenth_system/f1tenth_stack/maps/blob1.yaml', #os.path.join(bringup_dir,'maps',map_name),   
             description='Full path to map yaml file to load'),
 
         DeclareLaunchArgument(
-            'use_sim_time', default_value='false',
+            'use_sim_time', default_value='true',
             description='Use simulation (Gazebo) clock if true'),
 
         DeclareLaunchArgument(
@@ -78,7 +78,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'params_file',
-            default_value=os.path.join(bringup_dir, 'config', 'nav2_params_sim.yaml'),
+            default_value=os.path.join(bringup_dir, 'config', 'nav2_params.yaml'),
             description='Full path to the ROS2 parameters file to use'),
 
         Node(
