@@ -30,6 +30,11 @@ import range_libc
 import time
 from threading import Lock
 from particle_filter import utils as Utils
+import os
+import csv
+from ament_index_python.packages import get_package_share_directory
+
+
 
 # TF
 # import tf.transformations
@@ -62,6 +67,26 @@ class ParticleFiler(Node):
 
     def __init__(self):
         super().__init__('particle_filter')
+
+
+        source_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        csv_dir = os.path.join(source_dir, 'csv')
+        self.get_logger().info('CSV PATH = ' + csv_dir)
+
+        # CSV writing
+        # package_dir = get_package_share_directory('particle_filter')
+        # csv_dir = os.path.join(package_dir, 'csv')
+        self.get_logger().info('CSV PATH = ' + csv_dir)
+        # os.makedirs(csv_dir, exist_ok=True)
+
+        self.csv_path = '/home/f1jetson/f1tenth_ws/src/f1tenth_system/particle_filter/csv/pf_runtime.csv'
+        
+        # self.csv_path = os.path.join(csv_dir, 'pf_runtime.csv')
+        self.csv_file = open(self.csv_path, 'w', newline='')
+        self.csv_writer = csv.writer(self.csv_file)
+        self.csv_writer.writerow(['time', 'x', 'y', 'computation_time_ms'])
+
+
 
         # declare parameters
         self.declare_parameter('angle_step')
@@ -675,6 +700,15 @@ class ParticleFiler(Node):
 
                 # publish transformation frame based on inferred pose
                 self.publish_tf(self.inferred_pose, self.last_stamp)
+
+
+                # log to CSV
+                timestamp = t2  # seconds since epoch
+                x = self.inferred_pose[0]
+                y = self.inferred_pose[1]
+                comp_time_ms = (t2 - t1) * 1000
+                self.csv_writer.writerow([timestamp, x, y, comp_time_ms])
+                self.csv_file.flush()  # make sure data is written to disk
 
                 # this is for tracking particle filter speed
                 ips = 1.0 / (t2 - t1)
