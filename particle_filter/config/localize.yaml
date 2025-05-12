@@ -63,7 +63,7 @@ particle_filter:
     # range data filtering
     max_range: 8 #10
     fine_timing: 1 #0
-    publish_odom: 0
+    publish_odom: 1
     # sensor model constants
     z_short: 0.0 #0.01
     z_max: 0.03 #0.07
