@@ -4,6 +4,8 @@ from scipy.spatial import cKDTree
 from scipy.signal import find_peaks
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
+from matplotlib.lines import Line2D
+
 
 
 
@@ -176,25 +178,95 @@ def main():
     # Position error plot
     fig, ax = plt.subplots()
     sc = ax.scatter(theo_x, theo_y, c=errors, cmap='viridis', s=10, label='Theoretical Raceline')
-    ax.plot(act_x, act_y, 'r-', label='Actual Raceline (Averaged)')
-    plt.colorbar(sc, ax=ax, label='Position Error (m)')
-    ax.set_title('Raceline Comparison with Color-Coded Errors')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.legend()
+    ax.plot(theo_x[0], theo_y[0], 'ro', markersize=10, label='Start Point', zorder=5)
+    # ax.annotate('', xy=(theo_x[5], theo_y[5]), xytext=(theo_x[0], theo_y[0]),
+    #         arrowprops=dict(arrowstyle='-|>', color='red', lw=2), zorder=5)
+    # ax.plot(act_x, act_y, 'r-', label='Actual Raceline (Averaged)')
+    ax.plot(act_x, act_y, 'r-', label='Simulation Raceline')
+
+    cbar = plt.colorbar(sc, ax=ax)
+    cbar.ax.tick_params(labelsize=25)
+    cbar.set_label('Position Error (m)', size=25)
+    ax.set_title('Raceline Comparison with Color-Coded Errors', size=25)
+    ax.set_xlabel('x', size=25)
+    ax.set_ylabel('y', size=25)
+    # ax.legend(prop={'size': 15})
+    # ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+    #       fancybox=True, ncol=2, prop={'size':25})
+
+    # Create custom legend handles
+    legend_items_row1 = [
+        Line2D([0], [0], marker='o', color='w', label='Theoretical Raceline',
+            markerfacecolor='C0', markersize=6),
+        Line2D([0], [0], color='r', lw=2, label='Simulation Raceline')
+    ]
+    legend_items_row2 = [
+        Line2D([0], [0], marker='o', color='w', label='Start Point',
+            markerfacecolor='red', markersize=10)
+    ]
+
+    # First row legend
+    legend1 = ax.legend(handles=legend_items_row1, loc='upper center',
+                        bbox_to_anchor=(0.5, -0.1), ncol=2,
+                        fancybox=True, prop={'size': 25})
+    ax.add_artist(legend1)
+
+    # Second row legend (centered)
+    ax.legend(handles=legend_items_row2, loc='upper center',
+            bbox_to_anchor=(0.5, -0.25), ncol=1,
+            fancybox=True, prop={'size': 25})
+    
     ax.axis('equal')
+    fig.set_facecolor('#f2f1ec')
     plt.grid(True)
 
     # Velocity comparison plot
-    plt.figure()
-    plt.plot(idx, actual_v_resampled, label='Actual Velocity')
-    plt.plot(idx, scaled_theo_v, label=f'Scaled Theoretical Velocity (×{velocity_scale})')
-    plt.plot(idx, v_error, label='Velocity Error', linestyle='--')
-    plt.xlabel('Normalized Path Index')
-    plt.ylabel('Velocity (m/s)')
-    plt.title('Velocity Comparison')
-    plt.legend()
-    plt.grid(True)
+    # ax1 = plt.figure()
+    # plt.plot(idx, actual_v_resampled, label='Simulation Velocity')
+    # # plt.plot(idx, scaled_theo_v, label=f'Scaled Theoretical Velocity (×{velocity_scale})')
+    # plt.plot(idx, scaled_theo_v, label=f'Theoretical Velocity')
+    # plt.plot(idx, v_error, label='Velocity Error', linestyle='--')
+    # plt.xlabel('Normalized Path Index', size=25)
+    # plt.ylabel('Velocity (m/s)', size=25)
+    # plt.title('Velocity Comparison', size=25)
+    # # plt.legend(prop={'size': 15})
+    # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+    #       fancybox=True, ncol=2, prop={'size':25})
+    # ax1.set_facecolor('#f2f1ec')
+    # plt.grid(True)
+
+    # Velocity comparison plot
+    fig2, ax2 = plt.subplots()
+    line1, = ax2.plot(idx, actual_v_resampled, label='Simulation Velocity', color='tab:red')
+    line2, = ax2.plot(idx, scaled_theo_v, label='Theoretical Velocity', color='tab:blue')
+    line3, = ax2.plot(idx, v_error, label='Velocity Error', linestyle='--', color='tab:green')
+
+    ax2.set_xlabel('Normalized Path Index', size=25)
+    ax2.set_ylabel('Velocity (m/s)', size=25)
+    ax2.set_title('Velocity Comparison', size=25)
+
+    # Custom legend handles
+    legend_items_row1 = [
+        Line2D([0], [0], color='tab:blue', label='Theoretical Velocity'),
+        Line2D([0], [0], color='tab:red', label='Simulation Velocity')
+    ]
+    legend_items_row2 = [
+        Line2D([0], [0], color='tab:green', linestyle='--', label='Velocity Error')
+    ]
+
+    # First row legend
+    legend1 = ax2.legend(handles=legend_items_row1, loc='upper center',
+                        bbox_to_anchor=(0.5, -0.1), ncol=2,
+                        fancybox=True, prop={'size': 25})
+    ax2.add_artist(legend1)
+
+    # Second row legend (centered)
+    ax2.legend(handles=legend_items_row2, loc='upper center',
+            bbox_to_anchor=(0.5, -0.25), ncol=1,
+            fancybox=True, prop={'size': 25})
+
+    fig2.set_facecolor('#f2f1ec')
+    ax2.grid(True)
 
     plt.show()
 
