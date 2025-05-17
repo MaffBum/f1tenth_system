@@ -5,12 +5,24 @@ from scipy.signal import find_peaks
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 from matplotlib.lines import Line2D
+import csv
 
 
 
 
 def load_csv(filepath):
-    data = np.loadtxt(filepath, delimiter=',')
+    with open(filepath, 'r') as f:
+        reader = csv.reader(f)
+        first_row = next(reader)
+
+    # Check if first row is header (non-numeric values)
+    try:
+        [float(x) for x in first_row]
+        skip = 0  # It's numeric
+    except ValueError:
+        skip = 1  # Header detected
+
+    data = np.loadtxt(filepath, delimiter=',', skiprows=skip)
     return data[:, 0], data[:, 1], data[:, 2]
 
 def compute_actual_lap_times(timestamps, x, y, distance_threshold=1.0):
@@ -106,10 +118,10 @@ def compute_lap_time_from_velocity(x, y, v):
 def main():
     # Paths for the csvs for raceline and the actual car locations.
     # run from f1tenth_system directory
-    velocity_scale = 0.9
+    velocity_scale = 1.0
 
-    theoretical_path = './pure_pursuit/racelines/U_GP.csv' # raceline from raceline optimisation code
-    actual_path = './tf_listener/data/tf_data.csv' # true position from tf_listener
+    theoretical_path = './pure_pursuit/racelines/may15_GP.csv' # raceline from raceline optimisation code
+    actual_path = './particle_filter/csv/max500speed1.csv' # true position from tf_listener
 
     # Load both racelines
     theo_x, theo_y, theo_v = load_csv(theoretical_path)
