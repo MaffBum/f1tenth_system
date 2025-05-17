@@ -1,6 +1,6 @@
 pure_pursuit:
   ros__parameters:
-    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/may15_GP.csv"
+    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/11AprilGP.csv"
     odom_topic: "/odom"
     car_refFrame: "laser"
     global_refFrame: "map"
@@ -23,12 +23,13 @@ pure_pursuit:
     min_lookahead: 0.7 #  0.5
     max_lookahead: 2.0 #2.0 # lookahead when the car is going around max velocity
     lookahead_ratio: 3.0 # approximately the max velocity
-
-
     K_p: 0.3
+
+
+    
     steering_limit: 25.0
     velocity_percentage: 1.0 # the limit, can only do 1 lap with clean tires    
 
 waypoint_visualizer_node:
   ros__parameters:
-    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/may15_GP.csv"
+    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/11AprilGP.csv"
