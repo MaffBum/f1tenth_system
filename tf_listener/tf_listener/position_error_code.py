@@ -25,8 +25,10 @@ def load_csv(filepath):
     data = np.loadtxt(filepath, delimiter=',', skiprows=skip)
     return data[:, 0], data[:, 1], data[:, 2]
 
-def compute_actual_lap_times(timestamps, x, y, distance_threshold=1.0):
+def compute_actual_lap_times(timestamps, x, y, start_x=0.6, start_y=0.25, distance_threshold=1.0):
+    # dists = np.sqrt((x - start_x)**2 + (y - start_y)**2)
     # Define start/finish line as the first point
+    # x0, y0 = start_x, start_y
     x0, y0 = x[0], y[0]
     dists = np.sqrt((x - x0)**2 + (y - y0)**2)
 
@@ -118,10 +120,10 @@ def compute_lap_time_from_velocity(x, y, v):
 def main():
     # Paths for the csvs for raceline and the actual car locations.
     # run from f1tenth_system directory
-    velocity_scale = 1.0
+    velocity_scale = 0.9
 
-    theoretical_path = './pure_pursuit/racelines/may15_GP.csv' # raceline from raceline optimisation code
-    actual_path = './particle_filter/csv/max500speed1.csv' # true position from tf_listener
+    theoretical_path = './pure_pursuit/racelines/may18.csv' # raceline from raceline optimisation code
+    actual_path = './particle_filter/csv/E1 copy.csv' # true position from tf_listener
 
     # Load both racelines
     theo_x, theo_y, theo_v = load_csv(theoretical_path)
