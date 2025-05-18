@@ -8,7 +8,7 @@ particle_filter:
     odometry_topic: '/odom'
     # range data downsampling
     angle_step: 8 #18
-    max_particles: 500
+    max_particles: 1000
     squash_factor: 2.2
     # visualization
     viz: 1
@@ -27,16 +27,16 @@ particle_filter:
     z_hit: 0.85
     sigma_hit: 1.5
     # motion model dispersion constants
-    motion_dispersion_x: 0.02
-    motion_dispersion_y: 0.01
-    motion_dispersion_theta: 0.1
+    motion_dispersion_x: 0.02 # 0.02
+    motion_dispersion_y: 0.01 # 0.01
+    motion_dispersion_theta: 0.1 # 0.01
     # sensor model variant, variant 2 good for rmgpu, 3 doesn't work for rmgpu
     rangelib_variant: 2
     
 map_server:
   ros__parameters:
     # assuming map file is in particle_filter/maps
-    map: 'may15_GP'
+    map: 'may18' #may15_GP'
 
 
 
@@ -79,6 +79,6 @@ map_server:
 # map_server:
 #   ros__parameters:
 #     # assuming map file is in particle_filter/maps
-#     map: '14may_test'
+#     map: 'may18'
 
 
