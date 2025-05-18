@@ -123,7 +123,7 @@ def main():
     velocity_scale = 0.9
 
     theoretical_path = './pure_pursuit/racelines/may18.csv' # raceline from raceline optimisation code
-    actual_path = './particle_filter/csv/E1 copy.csv' # true position from tf_listener
+    actual_path = './particle_filter/csv/B2 copy.csv' # true position from tf_listener
 
     # Load both racelines
     theo_x, theo_y, theo_v = load_csv(theoretical_path)
