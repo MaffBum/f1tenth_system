@@ -5,16 +5,32 @@ from scipy.signal import find_peaks
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 from matplotlib.lines import Line2D
-
+import csv
+import os
+from PIL import Image
+import yaml
 
 
 
 def load_csv(filepath):
-    data = np.loadtxt(filepath, delimiter=',')
+    with open(filepath, 'r') as f:
+        reader = csv.reader(f)
+        first_row = next(reader)
+
+    # Check if first row is header (non-numeric values)
+    try:
+        [float(x) for x in first_row]
+        skip = 0  # It's numeric
+    except ValueError:
+        skip = 1  # Header detected
+
+    data = np.loadtxt(filepath, delimiter=',', skiprows=skip)
     return data[:, 0], data[:, 1], data[:, 2]
 
-def compute_actual_lap_times(timestamps, x, y, distance_threshold=1.0):
+def compute_actual_lap_times(timestamps, x, y, start_x=0.6, start_y=0.25, distance_threshold=1.0):
+    # dists = np.sqrt((x - start_x)**2 + (y - start_y)**2)
     # Define start/finish line as the first point
+    # x0, y0 = start_x, start_y
     x0, y0 = x[0], y[0]
     dists = np.sqrt((x - x0)**2 + (y - y0)**2)
 
@@ -104,12 +120,40 @@ def compute_lap_time_from_velocity(x, y, v):
 
 
 def main():
+    # Load map image
+    MAP_NAME = "may18"
+    if os.path.exists(f"./f1tenth_stack/maps/{MAP_NAME}.png"):
+        map_img_path = f"./f1tenth_stack/maps/{MAP_NAME}.png"
+    elif os.path.exists(f"./f1tenth_stack/maps/{MAP_NAME}.pgm"):
+        map_img_path = f"./f1tenth_stack/maps/{MAP_NAME}.pgm"
+    else:
+        raise Exception("Map not found!")
+    
+    map_yaml_path = f"./f1tenth_stack/maps/{MAP_NAME}.yaml"
+    with open(map_yaml_path, 'r') as yaml_stream:
+        try:
+            map_metadata = yaml.safe_load(yaml_stream)
+            map_resolution = map_metadata['resolution']
+            origin = map_metadata['origin']
+        except yaml.YAMLError as ex:
+            print(ex)
+
+    raw_map_img = np.array(Image.open(map_img_path).transpose(Image.FLIP_TOP_BOTTOM))
+    raw_map_img = raw_map_img.astype(np.float64)
+    height, width = raw_map_img.shape
+    xmin = origin[0]
+    xmax = origin[0] + width * map_resolution
+    ymin = origin[1]
+    ymax = origin[1] + height * map_resolution
+    extent = [origin[0], origin[0] + width * map_resolution, origin[1], origin[1] + height * map_resolution]
+    # np.array([origin[0], origin[1], 0])
+
     # Paths for the csvs for raceline and the actual car locations.
     # run from f1tenth_system directory
     velocity_scale = 0.9
 
-    theoretical_path = './pure_pursuit/racelines/U_GP.csv' # raceline from raceline optimisation code
-    actual_path = './tf_listener/data/tf_data.csv' # true position from tf_listener
+    theoretical_path = f'./pure_pursuit/racelines/{MAP_NAME}.csv' # raceline from raceline optimisation code
+    actual_path = './particle_filter/csv/A1 copy.csv' # true position from tf_listener
 
     # Load both racelines
     theo_x, theo_y, theo_v = load_csv(theoretical_path)
@@ -178,96 +222,102 @@ def main():
     # Position error plot
     fig, ax = plt.subplots()
     sc = ax.scatter(theo_x, theo_y, c=errors, cmap='viridis', s=10, label='Theoretical Raceline')
-    ax.plot(theo_x[0], theo_y[0], 'ro', markersize=10, label='Start Point', zorder=5)
+    # ax.plot(theo_x[0], theo_y[0], 'ro', markersize=10, label='Start Point', zorder=5)
     # ax.annotate('', xy=(theo_x[5], theo_y[5]), xytext=(theo_x[0], theo_y[0]),
     #         arrowprops=dict(arrowstyle='-|>', color='red', lw=2), zorder=5)
-    # ax.plot(act_x, act_y, 'r-', label='Actual Raceline (Averaged)')
-    ax.plot(act_x, act_y, 'r-', label='Simulation Raceline')
+    ax.plot(act_x, act_y, 'r-', label='Actual Raceline')
+    plt.imshow(raw_map_img, cmap='gray', origin='lower', extent=extent)
+    # ax.plot(act_x, act_y, 'r-', label='Simulation Raceline')
 
     cbar = plt.colorbar(sc, ax=ax)
-    cbar.ax.tick_params(labelsize=25)
-    cbar.set_label('Position Error (m)', size=25)
-    ax.set_title('Raceline Comparison with Color-Coded Errors', size=25)
-    ax.set_xlabel('x', size=25)
-    ax.set_ylabel('y', size=25)
+    # cbar.ax.tick_params(labelsize=25)
+    cbar.set_label('Position Error (m)')
+    ax.set_title('Raceline Comparison with Color-Coded Errors', size=12)
+    ax.set_xlabel('x', size=12)
+    ax.set_ylabel('y', size=12)
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([ymin, ymax])
     # ax.legend(prop={'size': 15})
-    # ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
-    #       fancybox=True, ncol=2, prop={'size':25})
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12),
+          fancybox=False, ncol=3, prop={'size':12})
 
-    # Create custom legend handles
-    legend_items_row1 = [
-        Line2D([0], [0], marker='o', color='w', label='Theoretical Raceline',
-            markerfacecolor='C0', markersize=6),
-        Line2D([0], [0], color='r', lw=2, label='Simulation Raceline')
-    ]
-    legend_items_row2 = [
-        Line2D([0], [0], marker='o', color='w', label='Start Point',
-            markerfacecolor='red', markersize=10)
-    ]
+    # # Create custom legend handles
+    # legend_items_row1 = [
+    #     Line2D([0], [0], marker='o', color='w', label='Theoretical Raceline',
+    #         markerfacecolor='C0', markersize=6),
+    #     Line2D([0], [0], color='r', lw=2, label='Simulation Raceline')
+    # ]
+    # legend_items_row2 = [
+    #     Line2D([0], [0], marker='o', color='w', label='Start Point',
+    #         markerfacecolor='red', markersize=10)
+    # ]
 
-    # First row legend
-    legend1 = ax.legend(handles=legend_items_row1, loc='upper center',
-                        bbox_to_anchor=(0.5, -0.1), ncol=2,
-                        fancybox=True, prop={'size': 25})
-    ax.add_artist(legend1)
+    # # First row legend
+    # legend1 = ax.legend(handles=legend_items_row1, loc='upper center',
+    #                     bbox_to_anchor=(0.5, -0.1), ncol=2,
+    #                     fancybox=True)
+    # ax.add_artist(legend1)
 
-    # Second row legend (centered)
-    ax.legend(handles=legend_items_row2, loc='upper center',
-            bbox_to_anchor=(0.5, -0.25), ncol=1,
-            fancybox=True, prop={'size': 25})
+    # # Second row legend (centered)
+    # ax.legend(handles=legend_items_row2, loc='upper center',
+    #         bbox_to_anchor=(0.5, -0.25), ncol=1,
+    #         fancybox=True)
     
-    ax.axis('equal')
-    fig.set_facecolor('#f2f1ec')
+    # ax.axis('equal')
+    # fig.set_facecolor('#f2f1ec')
+    plt.subplots_adjust(left=0.0, bottom=0.18, right=0.90, top=0.94)
     plt.grid(True)
 
     # Velocity comparison plot
-    # ax1 = plt.figure()
+    ax1 = plt.figure()
+    plt.plot(idx, actual_v_resampled, label='Actual Velocity')
     # plt.plot(idx, actual_v_resampled, label='Simulation Velocity')
-    # # plt.plot(idx, scaled_theo_v, label=f'Scaled Theoretical Velocity (×{velocity_scale})')
-    # plt.plot(idx, scaled_theo_v, label=f'Theoretical Velocity')
-    # plt.plot(idx, v_error, label='Velocity Error', linestyle='--')
-    # plt.xlabel('Normalized Path Index', size=25)
-    # plt.ylabel('Velocity (m/s)', size=25)
-    # plt.title('Velocity Comparison', size=25)
-    # # plt.legend(prop={'size': 15})
-    # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
-    #       fancybox=True, ncol=2, prop={'size':25})
+    # plt.plot(idx, scaled_theo_v, label=f'Scaled Theoretical Velocity (×{velocity_scale})')
+    plt.plot(idx, scaled_theo_v, label=f'Theoretical Velocity')
+    plt.plot(idx, v_error, label='Velocity Error', linestyle='--')
+    plt.xlabel('Normalized Path Index', size=12)
+    plt.ylabel('Velocity (m/s)', size=12)
+    plt.title('Velocity Comparison', size=12)
+    # plt.legend(prop={'size': 15})
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12),
+          fancybox=True, ncol=3, prop={'size':12})
     # ax1.set_facecolor('#f2f1ec')
-    # plt.grid(True)
+    plt.grid(True)
 
     # Velocity comparison plot
-    fig2, ax2 = plt.subplots()
-    line1, = ax2.plot(idx, actual_v_resampled, label='Simulation Velocity', color='tab:red')
-    line2, = ax2.plot(idx, scaled_theo_v, label='Theoretical Velocity', color='tab:blue')
-    line3, = ax2.plot(idx, v_error, label='Velocity Error', linestyle='--', color='tab:green')
+    # fig2, ax2 = plt.subplots()
+    # line1, = ax2.plot(idx, actual_v_resampled, label='Simulation Velocity', color='tab:red')
+    # line2, = ax2.plot(idx, scaled_theo_v, label='Theoretical Velocity', color='tab:blue')
+    # line3, = ax2.plot(idx, v_error, label='Velocity Error', linestyle='--', color='tab:green')
 
-    ax2.set_xlabel('Normalized Path Index', size=25)
-    ax2.set_ylabel('Velocity (m/s)', size=25)
-    ax2.set_title('Velocity Comparison', size=25)
+    # ax2.set_xlabel('Normalized Path Index', size=25)
+    # ax2.set_ylabel('Velocity (m/s)', size=25)
+    # ax2.set_title('Velocity Comparison', size=25)
 
-    # Custom legend handles
-    legend_items_row1 = [
-        Line2D([0], [0], color='tab:blue', label='Theoretical Velocity'),
-        Line2D([0], [0], color='tab:red', label='Simulation Velocity')
-    ]
-    legend_items_row2 = [
-        Line2D([0], [0], color='tab:green', linestyle='--', label='Velocity Error')
-    ]
+    # # Custom legend handles
+    # legend_items_row1 = [
+    #     Line2D([0], [0], color='tab:blue', label='Theoretical Velocity'),
+    #     Line2D([0], [0], color='tab:red', label='Simulation Velocity')
+    # ]
+    # legend_items_row2 = [
+    #     Line2D([0], [0], color='tab:green', linestyle='--', label='Velocity Error')
+    # ]
 
-    # First row legend
-    legend1 = ax2.legend(handles=legend_items_row1, loc='upper center',
-                        bbox_to_anchor=(0.5, -0.1), ncol=2,
-                        fancybox=True, prop={'size': 25})
-    ax2.add_artist(legend1)
+    # # First row legend
+    # legend1 = ax2.legend(handles=legend_items_row1, loc='upper center',
+    #                     bbox_to_anchor=(0.5, -0.1), ncol=2,
+    #                     fancybox=True, prop={'size': 25})
+    # ax2.add_artist(legend1)
 
-    # Second row legend (centered)
-    ax2.legend(handles=legend_items_row2, loc='upper center',
-            bbox_to_anchor=(0.5, -0.25), ncol=1,
-            fancybox=True, prop={'size': 25})
+    # # Second row legend (centered)
+    # ax2.legend(handles=legend_items_row2, loc='upper center',
+    #         bbox_to_anchor=(0.5, -0.25), ncol=1,
+    #         fancybox=True, prop={'size': 25})
 
-    fig2.set_facecolor('#f2f1ec')
-    ax2.grid(True)
+    # fig2.set_facecolor('#f2f1ec')
+    # ax2.grid(True)
 
+    plt.subplots_adjust(left=0.1, bottom=0.2, right=0.98, top=0.94)
     plt.show()
 
 if __name__ == '__main__':
