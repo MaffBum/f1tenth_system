@@ -6,7 +6,9 @@ from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 from matplotlib.lines import Line2D
 import csv
-
+import os
+from PIL import Image
+import yaml
 
 
 
@@ -118,11 +120,39 @@ def compute_lap_time_from_velocity(x, y, v):
 
 
 def main():
+    # Load map image
+    MAP_NAME = "may18"
+    if os.path.exists(f"./f1tenth_stack/maps/{MAP_NAME}.png"):
+        map_img_path = f"./f1tenth_stack/maps/{MAP_NAME}.png"
+    elif os.path.exists(f"./f1tenth_stack/maps/{MAP_NAME}.pgm"):
+        map_img_path = f"./f1tenth_stack/maps/{MAP_NAME}.pgm"
+    else:
+        raise Exception("Map not found!")
+    
+    map_yaml_path = f"./f1tenth_stack/maps/{MAP_NAME}.yaml"
+    with open(map_yaml_path, 'r') as yaml_stream:
+        try:
+            map_metadata = yaml.safe_load(yaml_stream)
+            map_resolution = map_metadata['resolution']
+            origin = map_metadata['origin']
+        except yaml.YAMLError as ex:
+            print(ex)
+
+    raw_map_img = np.array(Image.open(map_img_path).transpose(Image.FLIP_TOP_BOTTOM))
+    raw_map_img = raw_map_img.astype(np.float64)
+    height, width = raw_map_img.shape
+    xmin = origin[0]
+    xmax = origin[0] + width * map_resolution
+    ymin = origin[1]
+    ymax = origin[1] + height * map_resolution
+    extent = [origin[0], origin[0] + width * map_resolution, origin[1], origin[1] + height * map_resolution]
+    # np.array([origin[0], origin[1], 0])
+
     # Paths for the csvs for raceline and the actual car locations.
     # run from f1tenth_system directory
     velocity_scale = 0.9
 
-    theoretical_path = './pure_pursuit/racelines/may18.csv' # raceline from raceline optimisation code
+    theoretical_path = f'./pure_pursuit/racelines/{MAP_NAME}.csv' # raceline from raceline optimisation code
     actual_path = './particle_filter/csv/A1 copy.csv' # true position from tf_listener
 
     # Load both racelines
@@ -196,6 +226,7 @@ def main():
     # ax.annotate('', xy=(theo_x[5], theo_y[5]), xytext=(theo_x[0], theo_y[0]),
     #         arrowprops=dict(arrowstyle='-|>', color='red', lw=2), zorder=5)
     ax.plot(act_x, act_y, 'r-', label='Actual Raceline')
+    plt.imshow(raw_map_img, cmap='gray', origin='lower', extent=extent)
     # ax.plot(act_x, act_y, 'r-', label='Simulation Raceline')
 
     cbar = plt.colorbar(sc, ax=ax)
@@ -204,6 +235,8 @@ def main():
     ax.set_title('Raceline Comparison with Color-Coded Errors', size=12)
     ax.set_xlabel('x', size=12)
     ax.set_ylabel('y', size=12)
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([ymin, ymax])
     # ax.legend(prop={'size': 15})
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12),
           fancybox=False, ncol=3, prop={'size':12})
@@ -230,9 +263,9 @@ def main():
     #         bbox_to_anchor=(0.5, -0.25), ncol=1,
     #         fancybox=True)
     
-    ax.axis('equal')
+    # ax.axis('equal')
     # fig.set_facecolor('#f2f1ec')
-    plt.subplots_adjust(left=0.1, bottom=0.2, right=0.98, top=0.94)
+    plt.subplots_adjust(left=0.0, bottom=0.18, right=0.90, top=0.94)
     plt.grid(True)
 
     # Velocity comparison plot
