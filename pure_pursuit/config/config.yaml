@@ -24,12 +24,26 @@ pure_pursuit:
     max_lookahead: 2.0 #2.0 # lookahead when the car is going around max velocity
     lookahead_ratio: 3.0 # approximately the max velocity
     K_p: 0.3
-
-
-    
     steering_limit: 25.0
     velocity_percentage: 0.9 # the limit, can only do 1 lap with clean tires    
 
 waypoint_visualizer_node:
   ros__parameters:
     waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/may18.csv"
+
+
+stanley_controller:
+  ros__parameters:
+    waypoints_path: "/home/f1jetson/f1tenth_ws/src/f1tenth_system/pure_pursuit/racelines/may18.csv"
+    odom_topic: "/odom"
+    car_refFrame: "laser"
+    global_refFrame: "map"
+    drive_topic: "/drive"
+    rviz_current_waypoint_topic: "/current_waypoint"
+    rviz_lookahead_waypoint_topic: "/lookahead_waypoint"
+    
+    # Stanley Parameters
+    stanley_gain: 1.0
+    steering_limit: 25.0
+    velocity_percentage: 0.9
+

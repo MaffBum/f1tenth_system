@@ -40,17 +40,9 @@ include_directories(
 # Create Cpp executable
 add_executable(pure_pursuit src/pure_pursuit.cpp)
 
-
 ament_target_dependencies(pure_pursuit
   rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs visualization_msgs tf2_ros tf2 eigen3_cmake_module Eigen3
 )
-
-add_executable(stanley_controller src/stanley_controller.cpp)
-
-ament_target_dependencies(stanley_controller
-  rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs visualization_msgs tf2_ros tf2 eigen3_cmake_module Eigen3
-)
-
 
 add_executable(waypoint_visualizer src/waypoint_visualizer.cpp)
 
@@ -62,7 +54,6 @@ ament_target_dependencies(waypoint_visualizer
 install(TARGETS
   pure_pursuit
   waypoint_visualizer
-  stanley_controller
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files and config
